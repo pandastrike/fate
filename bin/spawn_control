@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "json"
+
+# set up loadpath
+here = File.dirname(__FILE__)
+SPAWN_CONTROL_ROOT = File.expand_path("#{here}/..")
+$LOAD_PATH.unshift("#{SPAWN_CONTROL_ROOT}/lib")
+
+require "spawn_control"
+
+string = File.read("spawn_control.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = SpawnControl.new(configuration)
+
+
+if ARGV.size == 0
+  require "spawn_control/console"
+  spawner.start
+  spawner.console
+else
+  spawner.start
+end
+
+
