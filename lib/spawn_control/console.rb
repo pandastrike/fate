@@ -11,8 +11,13 @@ class SpawnControl
       puts "* Tab completion works for commands and config keys"
     end
 
-    on("quit") do
+    on("quit", "q", "exit") do
       exit
+    end
+
+    on(/stop (\S+)$/) do |args|
+      command = args.first
+      self.stop_command(args.first)
     end
 
     on_bang do |args|
