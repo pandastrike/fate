@@ -14,8 +14,11 @@ string = File.read("spawn_control.json")
 configuration = JSON.parse(string, :symbolize_names => true)
 spawner = SpawnControl.new(configuration)
 
+trap("INT") do
+  exit
+end
 
-if ARGV.size == 0
+if ARGV.first == "console"
   require "spawn_control/console"
   spawner.start
   spawner.console
