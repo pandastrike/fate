@@ -1,5 +1,8 @@
 require "pp"
 require "set"
+
+require "term/ansicolor"
+
 require "hash_tree"
 # Cross-VM compatibility
 # thanks to http://ku1ik.com/2010/09/18/open3-and-the-pid-of-the-spawn.html
@@ -34,7 +37,7 @@ class SpawnControl
       @commands[key] = value
     end
 
-    @threads = []
+    @threads = {}
     @pid_tracker = {}
     @command_tracker = {}
   end
@@ -70,7 +73,9 @@ class SpawnControl
       sleep 0.1
     end
 
-    puts format_line("SpawnControl", "All commands are running. ")
+    message = format_line("SpawnControl", "All commands are running. ")
+    puts colorize("green", message)
+
     if block
       yield
       stop
@@ -81,7 +86,7 @@ class SpawnControl
   def spawn(name, command)
     return Thread.new do
       pid, stdin, stdout, stderr = open4(command)
-      puts format_line("SpawnControl", "Starting (#{pid}): #{command}")
+      puts colorize("yellow", format_line("SpawnControl", "Starting (#{pid}): #{command}"))
       @pid_tracker[pid] = name
       @command_tracker[name] = pid
 
@@ -95,7 +100,8 @@ class SpawnControl
       # signalling that it is ready.
       line = stdout.gets
       STDOUT.puts format_line(name, line)
-      @threads << Thread.current
+      @threads[name] = Thread.current
+      #@threads << Thread.current
 
       while line = stdout.gets
         STDOUT.puts format_line(name, line)
@@ -109,6 +115,7 @@ class SpawnControl
       system command
       @pid_tracker.clear
       @command_tracker.clear
+      @threads.clear
     end
   end
 
@@ -127,13 +134,59 @@ class SpawnControl
       if pid = @command_tracker[name]
         @pid_tracker.delete(pid)
         @command_tracker.delete(name)
-        puts "Found a command named #{name} running with pid #{pid}"
+        @threads.delete(name)
+        puts "#{name} is running with pid #{pid}"
         system "kill -s INT #{pid}"
-        puts "I just killed it.  Are you not entertained?"
+        puts "Sent a kill signal to #{pid}"
       end
     else
       puts "No such command registered: #{name}"
     end
+  end
+
+  def start_command(name)
+    if command = @commands[name]
+      if pid = @command_tracker[name]
+        puts "#{name} is already running with pid #{pid}"
+      else
+        spawn(name, command)
+        until @threads[name]
+          sleep 0.1
+        end
+        puts colorize("green", format_line("SpawnControl", "#{command} is running."))
+      end
+    else
+      puts "No such command registered: #{name}"
+    end
+  end
+
+  def restart
+    stop
+    start
+  end
+
+  def restart_command(name)
+    stop_command(name)
+    start_command(name)
+  end
+
+  # list currently running commands
+  def running
+    names = @command_tracker.map {|name, command| name }
+  end
+
+  # ad hoc shell out, with rescuing because of some apparent bugs
+  # in MRI 1.8.7's ability to cope with unusual exit codes.
+  def system(command)
+    begin
+      system command
+    rescue => error
+      puts "Exception raised when shelling out: #{error.inspect}"
+    end
+  end
+
+  def colorize(name, string)
+    [Term::ANSIColor.send(name), string, Term::ANSIColor.reset].join
   end
 
 end
