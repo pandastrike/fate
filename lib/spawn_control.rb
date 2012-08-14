@@ -1,4 +1,3 @@
-require "pp"
 require "set"
 
 require "term/ansicolor"
@@ -179,7 +178,7 @@ class SpawnControl
   # in MRI 1.8.7's ability to cope with unusual exit codes.
   def system(command)
     begin
-      system command
+      Kernel.system command
     rescue => error
       puts "Exception raised when shelling out: #{error.inspect}"
     end

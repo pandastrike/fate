@@ -34,7 +34,7 @@ class SpawnControl
     end
 
     on_bang do |args|
-      system args.first
+      self.system args.first
     end
 
     on("commands") do
