@@ -29,5 +29,6 @@ spawner = SpawnControl.new(configuration, :service_log => "logs/service.log")
 
 spawner.start do
   # run your tests
+  # when this block finishes evaluation, SpawnControl shuts down the servie
 end
 ```
