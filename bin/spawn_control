@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require "optparse"
 require "rubygems"
 require "json"
 
@@ -10,7 +11,19 @@ $LOAD_PATH.unshift("#{SPAWN_CONTROL_ROOT}/lib")
 
 require "spawn_control"
 
-string = File.read("spawn_control.json")
+options = {
+  :configuration => "spawn_control.json"
+}
+
+# TODO: config file flag
+OptionParser.new do |parser|
+  parser.on("-c", "--configuration=FILE", "The origin of the events") do |file|
+    options[:configuration] = file
+  end
+end.parse!
+
+
+string = File.read(options[:configuration])
 configuration = JSON.parse(string, :symbolize_names => true)
 spawner = SpawnControl.new(configuration)
 
@@ -18,12 +31,8 @@ trap("INT") do
   exit
 end
 
-if ARGV.first == "console"
-  require "spawn_control/console"
-  spawner.start
-  spawner.console
-else
-  spawner.start
-end
+require "spawn_control/console"
+spawner.start
+spawner.console
 
 
