@@ -22,8 +22,14 @@ class SpawnControl
 
   attr_reader :commands, :configuration, :completions
 
-  def initialize(configuration)
+  def initialize(configuration, options={})
     @configuration = configuration
+    @options = options
+    if logfile = options[:service_log]
+      @log = File.new(logfile, "a")
+    else
+      @log = STDOUT
+    end
     commands = HashTree[@configuration[:commands]]
 
     @completions = Set.new
@@ -91,19 +97,19 @@ class SpawnControl
 
       Thread.new do
         while line = stderr.gets
-          $stderr.puts "(#{name}) #{line}"
+          STDERR.puts "(#{name}) #{line}"
         end
       end
 
       # First line written to STDOUT is interpreted as the service
       # signalling that it is ready.
       line = stdout.gets
-      STDOUT.puts format_line(name, line)
+      @log.puts format_line(name, line)
       @threads[name] = Thread.current
       #@threads << Thread.current
 
       while line = stdout.gets
-        STDOUT.puts format_line(name, line)
+        @log.puts format_line(name, line)
       end
     end
   end
@@ -122,25 +128,37 @@ class SpawnControl
     if identifier == @last_identifier
       "%-#{@command_width}s - %s" % [nil, line]
     else
-      puts
       @last_identifier = identifier
       "%-#{@command_width}s - %s" % [identifier, line]
     end
   end
 
   def stop_command(name)
+    targets = []
     if command = @commands[name]
+      targets << name
+    else
+      @commands.each do |cname, _command|
+        if cname.split(".").first == name
+          targets << cname
+        end
+      end
+    end
+
+    if targets.empty?
+      puts "No such command registered: #{name}"
+    end
+
+    targets.each do |name|
       if pid = @command_tracker[name]
         @pid_tracker.delete(pid)
         @command_tracker.delete(name)
         @threads.delete(name)
-        puts "#{name} is running with pid #{pid}"
         system "kill -s INT #{pid}"
-        puts "Sent a kill signal to #{pid}"
+        puts colorize("yellow", format_line("SpawnControl", "Sent a kill signal to #{name} running at #{pid}"))
       end
-    else
-      puts "No such command registered: #{name}"
     end
+
   end
 
   def start_command(name)
