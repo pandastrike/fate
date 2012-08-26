@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "spawn_control"
-  s.version = "0.2.0"
+  s.version = "0.2.1"
   s.authors = ["Matthew King"]
   s.homepage = "https://github.com/automatthew/spawn_control"
   s.summary = "Tool for running and interacting with a multi-process service"
