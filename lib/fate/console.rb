@@ -1,5 +1,5 @@
 require "consolize"
-class SpawnControl
+class Fate
 
   include Consolize
 

@@ -9,10 +9,10 @@ here = File.dirname(__FILE__)
 SPAWN_CONTROL_ROOT = File.expand_path("#{here}/..")
 $LOAD_PATH.unshift("#{SPAWN_CONTROL_ROOT}/lib")
 
-require "spawn_control"
+require "fate"
 
 options = {
-  :configuration => "spawn_control.json"
+  :configuration => "fate.json"
 }
 
 # TODO: config file flag
@@ -25,13 +25,13 @@ end.parse!
 
 string = File.read(options[:configuration])
 configuration = JSON.parse(string, :symbolize_names => true)
-spawner = SpawnControl.new(configuration)
+spawner = Fate.new(configuration)
 
 trap("INT") do
   exit
 end
 
-require "spawn_control/console"
+require "fate/console"
 spawner.start
 spawner.console
 

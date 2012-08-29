@@ -14,21 +14,21 @@ Example of a service spec:
 
 Command line usage:
 
-    spawn_control -c service.json
+    fate_control -c service.json
 
 
 
 Usage within Ruby:
 
 ```ruby
-require "spawn_control"
+require "fate_control"
 require "json"
 string = File.read("service.json")
 configuration = JSON.parse(string, :symbolize_names => true)
-spawner = SpawnControl.new(configuration, :service_log => "logs/service.log")
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
 
 spawner.start do
   # run your tests
-  # when this block finishes evaluation, SpawnControl shuts down the service
+  # when this block finishes evaluation, Fate shuts down the service
 end
 ```

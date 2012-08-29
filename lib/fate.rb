@@ -14,7 +14,7 @@ else
   require 'open4'
 end
 
-class SpawnControl
+class Fate
 
   def self.start(configuration, &block)
     self.new(configuration).start(&block)
@@ -78,7 +78,7 @@ class SpawnControl
       sleep 0.1
     end
 
-    message = format_line("SpawnControl", "All commands are running. ")
+    message = format_line("Fate", "All commands are running. ")
     puts colorize("green", message)
 
     if block
@@ -91,7 +91,7 @@ class SpawnControl
   def spawn(name, command)
     return Thread.new do
       pid, stdin, stdout, stderr = open4(command)
-      puts colorize("yellow", format_line("SpawnControl", "Starting (#{pid}): #{command}"))
+      puts colorize("yellow", format_line("Fate", "Starting (#{pid}): #{command}"))
       @pid_tracker[pid] = name
       @command_tracker[name] = pid
 
@@ -155,7 +155,7 @@ class SpawnControl
         @command_tracker.delete(name)
         @threads.delete(name)
         system "kill -s INT #{pid}"
-        puts colorize("yellow", format_line("SpawnControl", "Sent a kill signal to #{name} running at #{pid}"))
+        puts colorize("yellow", format_line("Fate", "Sent a kill signal to #{name} running at #{pid}"))
       end
     end
 
@@ -170,7 +170,7 @@ class SpawnControl
         until @threads[name]
           sleep 0.1
         end
-        puts colorize("green", format_line("SpawnControl", "#{command} is running."))
+        puts colorize("green", format_line("Fate", "#{command} is running."))
       end
     else
       puts "No such command registered: #{name}"

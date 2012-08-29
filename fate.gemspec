@@ -1,19 +1,19 @@
 Gem::Specification.new do |s|
-  s.name = "spawn_control"
+  s.name = "fate"
   s.version = "0.2.2"
   s.authors = ["Matthew King"]
-  s.homepage = "https://github.com/automatthew/spawn_control"
+  s.homepage = "https://github.com/automatthew/fate"
   s.summary = "Tool for running and interacting with a multi-process service"
 
   s.files = %w[
-    bin/spawn_control
+    bin/fate
     LICENSE
-    lib/spawn_control.rb
+    lib/fate.rb
     lib/hash_tree.rb
-    lib/spawn_control/console.rb
+    lib/fate/console.rb
   ]
   s.require_path = "lib"
-  s.executables = "spawn_control"
+  s.executables = "fate"
 
   s.add_dependency("consolize", ">=0.2.0")
   s.add_dependency("open4", ">=1.3.0")
