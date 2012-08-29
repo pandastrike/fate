@@ -82,7 +82,7 @@ class SpawnControl
     puts colorize("green", message)
 
     if block
-      yield
+      yield(self)
       stop
     end
 
