@@ -6,8 +6,8 @@ require "json"
 
 # set up loadpath
 here = File.dirname(__FILE__)
-SPAWN_CONTROL_ROOT = File.expand_path("#{here}/..")
-$LOAD_PATH.unshift("#{SPAWN_CONTROL_ROOT}/lib")
+FATE_ROOT = File.expand_path("#{here}/..")
+$LOAD_PATH.unshift("#{FATE_ROOT}/lib")
 
 require "fate"
 
@@ -25,14 +25,14 @@ end.parse!
 
 string = File.read(options[:configuration])
 configuration = JSON.parse(string, :symbolize_names => true)
-spawner = Fate.new(configuration)
+fate = Fate.new(configuration)
 
 trap("INT") do
   exit
 end
 
 require "fate/console"
-spawner.start
-spawner.console
+fate.start
+fate.console
 
 

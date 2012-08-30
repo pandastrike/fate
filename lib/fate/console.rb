@@ -1,3 +1,4 @@
+gem "consolize"
 require "consolize"
 class Fate
 
@@ -16,7 +17,7 @@ class Fate
 
     on(/stop (\S+)$/) do |args|
       command = args.first
-      self.stop_command(args.first)
+      self.manager.stop_command(args.first)
     end
 
     on(/start (\S+)$/) do |args|
@@ -30,7 +31,7 @@ class Fate
 
     on(/restart (\S+)$/) do |args|
       command = args.first
-      self.restart_command(args.first)
+      self.manager.restart_command(args.first)
     end
 
     on_bang do |args|
@@ -38,11 +39,11 @@ class Fate
     end
 
     on("commands") do
-      puts JSON.pretty_generate(commands)
+      puts JSON.pretty_generate(self.name_commands)
     end
 
     on("running") do
-      puts self.running
+      puts self.manager.running
     end
 
     on("configuration", "config") do
