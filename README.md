@@ -14,14 +14,14 @@ Example of a service spec:
 
 Command line usage:
 
-    fate_control -c service.json
+    fate -c service.json
 
 
 
 Usage within Ruby:
 
 ```ruby
-require "fate_control"
+require "fate"
 require "json"
 string = File.read("service.json")
 configuration = JSON.parse(string, :symbolize_names => true)

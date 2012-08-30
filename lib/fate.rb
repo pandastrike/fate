@@ -1,8 +1,10 @@
 require "set"
 
+gem "term-ansicolor"
+gem "squeeze"
 require "term/ansicolor"
+require "squeeze/hash_tree"
 
-require "hash_tree"
 # Cross-VM compatibility
 # thanks to http://ku1ik.com/2010/09/18/open3-and-the-pid-of-the-spawn.html
 # TODO: consider using systemu: https://github.com/ahoward/systemu/
@@ -30,7 +32,7 @@ class Fate
     else
       @log = STDOUT
     end
-    commands = HashTree[@configuration[:commands]]
+    commands = Squeeze::HashTree[@configuration[:commands]]
 
     @completions = Set.new
 

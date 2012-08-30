@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "fate"
-  s.version = "0.2.2"
+  s.version = "0.2.3"
   s.authors = ["Matthew King"]
   s.homepage = "https://github.com/automatthew/fate"
   s.summary = "Tool for running and interacting with a multi-process service"
@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.files = %w[
     bin/fate
     LICENSE
+    README.md
     lib/fate.rb
-    lib/hash_tree.rb
     lib/fate/console.rb
   ]
   s.require_path = "lib"
@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency("consolize", ">=0.2.0")
   s.add_dependency("open4", ">=1.3.0")
+  s.add_dependency("squeeze", ">=0.2.0")
   s.add_dependency("term-ansicolor", ">=1.0.0")
 end
 
