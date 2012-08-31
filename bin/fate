@@ -31,7 +31,7 @@ trap("INT") do
   exit
 end
 
-require "fate/console"
+require "fate/repl"
 fate.start
 fate.repl
 

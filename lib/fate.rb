@@ -12,6 +12,10 @@ Thread.abort_on_exception = true
 
 class Fate
 
+  class CommandRegistry
+    # TODO
+  end
+
   include Formatter
 
   def self.start(configuration, &block)
@@ -66,9 +70,37 @@ class Fate
     end
   end
 
+  def stop_command(name)
+    if @name_commands[name]
+      manager.stop_command(name)
+    else
+      puts "No such command registered: #{name}"
+    end
+  end
+
+  def restart_command(name)
+    stop_command(name)
+    start_command(name)
+  end
+
+  def running
+    manager.running
+  end
+
   def restart
-    manager.stop
-    start
+    keys = @name_commands.keys
+    # presuming the spec file ordered the commands where the dependencies
+    # come before the dependers, we should stop the processes in reverse order,
+    # then start them back up again in forward order.
+    names = manager.running.sort_by {|name| keys.index(name) }
+    names.reverse.each do |name|
+      manager.stop_command(name)
+    end
+    sleep 0.2
+    names.each do |name|
+      command = @name_commands[name]
+      manager.start_command(name, command)
+    end
   end
 
   # ad hoc shell out, with rescuing because of some apparent bugs
@@ -77,7 +109,7 @@ class Fate
     begin
       Kernel.system command
     rescue => error
-      puts "Exception raised when shelling out: #{error.inspect}"
+      puts "Exception raised when executing '#{command}': #{error.inspect}"
     end
   end
 

@@ -15,12 +15,12 @@ class Fate
       exit
     end
 
-    on(/stop (\S+)$/) do |args|
+    on(/^stop (\S+)$/) do |args|
       command = args.first
-      self.manager.stop_command(args.first)
+      self.stop_command(args.first)
     end
 
-    on(/start (\S+)$/) do |args|
+    on(/^start (\S+)$/) do |args|
       command = args.first
       self.start_command(args.first)
     end
@@ -31,7 +31,7 @@ class Fate
 
     on(/restart (\S+)$/) do |args|
       command = args.first
-      self.manager.restart_command(args.first)
+      self.restart_command(args.first)
     end
 
     on_bang do |args|
@@ -43,7 +43,7 @@ class Fate
     end
 
     on("running") do
-      puts self.manager.running
+      puts self.running
     end
 
     on("configuration", "config") do

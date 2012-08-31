@@ -18,36 +18,36 @@ class Fate
       @log = options[:log]
       @command_width = options[:command_width]
       @threads = {}
-      @name_commands = {}
-      @pid_names = {}
-      @name_pids = {}
+      @commands_by_name = {}
+      @names_by_pid = {}
+      @pids_by_name = {}
       wait
       at_exit { stop }
     end
 
     def wait
       Thread.new do
-        begin
-          pid, status = Process.wait2(-1)
-          handle_child_termination(pid, status)
-        rescue Errno::ECHILD
-          sleep 1
-          retry
-        end
         loop do
-          # pid of -1 means to wait for any child process
-          pid, status = Process.wait2(-1)
-          handle_child_termination(pid, status)
+          begin
+            pid, status = Process.wait2(-1)
+            handle_child_termination(pid, status)
+          rescue Errno::ECHILD
+            sleep 1
+            retry
+          end
         end
       end
     end
 
     def handle_child_termination(pid, status)
-      if name = @pid_names.delete(pid)
-        @name_pids.delete(name)
-        command = @name_commands[name]
+      if name = @names_by_pid.delete(pid)
+        @pids_by_name.delete(name)
+        command = @commands_by_name[name]
+        # TODO: CLI and instantiation flags for @mode
         if (@mode != :production) && status.exitstatus != 0
           down_in_flames(name, pid, status)
+        else
+          # Probably should notify somebody somehow
         end
       end
     end
@@ -60,7 +60,7 @@ class Fate
 
     def spawn_commands(hash)
       hash.each do |name, command|
-        @name_commands[name] = command
+        @commands_by_name[name] = command
         start_command(name, command)
       end
 
@@ -75,7 +75,7 @@ class Fate
     end
 
     def start_command(name, command)
-      if pid = @name_pids[name]
+      if pid = @pids_by_name[name]
         puts "#{name} is already running with pid #{pid}"
       else
         spawn(name, command)
@@ -91,8 +91,8 @@ class Fate
       return Thread.new do
         pid, stdin, stdout, stderr = open4(command)
         puts colorize("yellow", format_line("Fate", "Starting (#{pid}): #{name}"))
-        @pid_names[pid] = name
-        @name_pids[name] = pid
+        @names_by_pid[pid] = name
+        @pids_by_name[name] = pid
 
         Thread.new do
           while line = stderr.gets
@@ -110,26 +110,17 @@ class Fate
         while line = stdout.gets
           @log.puts format_line(name, line)
         end
-      end
-    end
-
-    def stop
-      if @pid_names.size != 0
-        pids = @pid_names.keys.join(" ")
-        @pid_names.clear
-        @name_pids.clear
-        @threads.clear
-        command = "kill #{pids}"
-        system command
+        #status = Process.wait(pid)
+        #handle_child_termination(pid, status)
       end
     end
 
     def stop_command(name)
       targets = []
-      if command = @name_commands[name]
+      if command = @commands_by_name[name]
         targets << name
       else
-        @name_commands.each do |cname, _command|
+        @commands_by_name.each do |cname, _command|
           if cname.split(".").first == name
             targets << cname
           end
@@ -141,9 +132,9 @@ class Fate
       end
 
       targets.each do |name|
-        if pid = @name_pids[name]
-          @pid_names.delete(pid)
-          @name_pids.delete(name)
+        if pid = @pids_by_name[name]
+          @names_by_pid.delete(pid)
+          @pids_by_name.delete(name)
           @threads.delete(name)
           system "kill -s INT #{pid}"
           puts colorize("yellow", format_line("Fate", "Sent a kill signal to #{name} running at #{pid}"))
@@ -152,21 +143,32 @@ class Fate
 
     end
 
-    def restart
-      stop
-      start
-    end
-
-    def restart_command(name)
-      command = @name_commands[name]
-      stop_command(name)
-      start_command(name, command)
+    def stop
+      if @names_by_pid.size != 0
+        pids = @names_by_pid.keys.join(" ")
+        @names_by_pid.clear
+        @pids_by_name.clear
+        @threads.clear
+        command = "kill #{pids}"
+        system command
+      end
     end
 
     # list currently running commands
     def running
-      names = @name_pids.map {|name, command| name }.sort
+      names = @pids_by_name.map {|name, command| name }.sort
     end
+
+    # ad hoc shell out, with rescuing because of some apparent bugs
+    # in MRI 1.8.7's ability to cope with unusual exit codes.
+    def system(command)
+      begin
+        Kernel.system command
+      rescue => error
+        puts "Exception raised when executing '#{command}': #{error.inspect}"
+      end
+    end
+
 
 
   end
