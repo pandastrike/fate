@@ -1,9 +1,5 @@
-task "build" do
-  sh "gem build ./fate.gemspec"
-end
+require "starter/tasks/gems"
+require "starter/tasks/git"
 
-task "clean" do
-  FileList["fate-*.gem"].each do |file|
-    rm file
-  end
-end
+task "build" => %w[ gem:build ]
+
