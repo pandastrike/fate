@@ -25,16 +25,20 @@ class Fate
     end
 
 
-    def start_group(hash, blocking=:noblock)
+    def stop
+      @names_by_pid.each do |pid, name|
+        kill(name)
+      end
+    end
+
+    def start_group(hash)
       hash.each do |name, command|
         @commands_by_name[name] = command
         start_command(name, command)
       end
 
-      if blocking == :block
-        until @threads.size == hash.size
-          sleep 0.1
-        end
+      until @threads.size == hash.size
+        sleep 0.1
       end
     end
 
@@ -46,11 +50,28 @@ class Fate
       end
     end
 
+    def kill(name)
+      if pid = @pids_by_name[name]
+        @names_by_pid.delete(pid)
+        @pids_by_name.delete(name)
+        @threads.delete(name)
+        system "kill -s INT #{pid}"
+        puts colorize "yellow",
+          format_line("Fate Manager", "Sent a kill signal to #{name} running at #{pid}")
+      else
+        puts "Could not find pid for #{name}"
+      end
+    end
+
+    def stop_command(name)
+      kill(name)
+    end
+
     def spawn(name, command)
       # TODO: check to see if command is already running
       return Thread.new do
         pid, stdin, stdout, stderr = open4(command)
-        puts colorize("yellow", format_line("Fate", "Starting (#{pid}): #{name}"))
+        puts colorize("yellow", format_line("Fate Manager", "Starting (#{pid}): #{name}"))
         @names_by_pid[pid] = name
         @pids_by_name[name] = pid
 
@@ -63,7 +84,7 @@ class Fate
         # First line written to STDOUT is interpreted as the service
         # signalling that it is ready.
         line = stdout.gets
-        puts colorize("yellow", format_line("Fate", "#{name} is running."))
+        puts colorize("yellow", format_line("Fate Manager", "#{name} is running."))
         @log.puts format_line(name, line)
         @threads[name] = Thread.current
         #@threads << Thread.current
@@ -73,46 +94,6 @@ class Fate
         end
         status = Process.wait(pid)
         handle_child_termination(pid, status)
-      end
-    end
-
-    def stop_command(name)
-      targets = []
-      if command = @commands_by_name[name]
-        targets << name
-      else
-        @commands_by_name.each do |cname, _command|
-          if cname.split(".").first == name
-            targets << cname
-          end
-        end
-      end
-
-      if targets.empty?
-        puts "No such command running: #{name}"
-      end
-
-      targets.each do |name|
-        if pid = @pids_by_name[name]
-          @names_by_pid.delete(pid)
-          @pids_by_name.delete(name)
-          @threads.delete(name)
-          system "kill -s INT #{pid}"
-          puts colorize "yellow",
-            format_line("Fate", "Sent a kill signal to #{name} running at #{pid}")
-        end
-      end
-
-    end
-
-    def stop
-      if @names_by_pid.size != 0
-        pids = @names_by_pid.keys.join(" ")
-        @names_by_pid.clear
-        @pids_by_name.clear
-        @threads.clear
-        command = "kill #{pids}"
-        system command
       end
     end
 

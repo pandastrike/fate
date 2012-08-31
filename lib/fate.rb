@@ -63,8 +63,8 @@ class Fate
   end
 
   def start
-    manager.start_group(@name_commands, :block)
-    message = format_line("Fate", "All commands are running. ")
+    manager.start_group(@name_commands)
+    message = format_line("Fate Control", "All commands are running. ")
     puts colorize("green", message)
   end
 
@@ -81,24 +81,45 @@ class Fate
 
   def restart
     stop
+    # FIXME: this is here to prevent redis-server from crying
     sleep 0.5
     start
   end
 
-
-  def start_command(name)
-    if command = @name_commands[name]
-      manager.start_command(name, command)
+  def resolve_commands(name)
+    targets = []
+    if @name_commands.has_key?(name)
+      targets << name
     else
-      puts "No such command registered: #{name}"
+      @name_commands.each do |cname, _command|
+        if cname.split(".").first == name
+          targets << cname
+        end
+      end
+    end
+    targets
+  end
+
+  def start_command(spec)
+    names = resolve_commands(spec)
+    if names.empty?
+      puts "No commands found for: #{spec}"
+    else
+      names.each do |name|
+        command = @name_commands[name]
+        manager.start_command(name, command)
+      end
     end
   end
 
-  def stop_command(name)
-    if @name_commands[name]
-      manager.stop_command(name)
+  def stop_command(spec)
+    names = resolve_commands(spec)
+    if names.empty?
+      puts "No commands found for: #{spec}"
     else
-      puts "No such command registered: #{name}"
+      names.each do |name|
+        manager.stop_command(name)
+      end
     end
   end
 
