@@ -21,57 +21,21 @@ class Fate
       @commands_by_name = {}
       @names_by_pid = {}
       @pids_by_name = {}
-      wait
       at_exit { stop }
     end
 
-    def wait
-      Thread.new do
-        loop do
-          begin
-            pid, status = Process.wait2(-1)
-            handle_child_termination(pid, status)
-          rescue Errno::ECHILD
-            sleep 1
-            retry
-          end
-        end
-      end
-    end
 
-    def handle_child_termination(pid, status)
-      if name = @names_by_pid.delete(pid)
-        @pids_by_name.delete(name)
-        command = @commands_by_name[name]
-        # TODO: CLI and instantiation flags for @mode
-        if (@mode != :production) && status.exitstatus != 0
-          down_in_flames(name, pid, status)
-        else
-          # Probably should notify somebody somehow
-        end
-      end
-    end
-
-    def down_in_flames(name, pid, status)
-      puts "Process '#{name}' (pid #{pid}) exited with code #{status}:"
-      puts "Shutting down all processes."
-      exit(status.exitstatus)
-    end
-
-    def spawn_commands(hash)
+    def start_group(hash, blocking=:noblock)
       hash.each do |name, command|
         @commands_by_name[name] = command
         start_command(name, command)
       end
 
-      # Command threads add themselves to the array when they believe
-      # their commands are ready.
-      until @threads.size == hash.size
-        sleep 0.1
+      if blocking == :block
+        until @threads.size == hash.size
+          sleep 0.1
+        end
       end
-
-      message = format_line("Fate", "All commands are running. ")
-      puts colorize("green", message)
     end
 
     def start_command(name, command)
@@ -79,10 +43,6 @@ class Fate
         puts "#{name} is already running with pid #{pid}"
       else
         spawn(name, command)
-        until @threads[name]
-          sleep 0.1
-        end
-        puts colorize("yellow", format_line("Fate", "#{name} is running."))
       end
     end
 
@@ -103,6 +63,7 @@ class Fate
         # First line written to STDOUT is interpreted as the service
         # signalling that it is ready.
         line = stdout.gets
+        puts colorize("yellow", format_line("Fate", "#{name} is running."))
         @log.puts format_line(name, line)
         @threads[name] = Thread.current
         #@threads << Thread.current
@@ -110,8 +71,8 @@ class Fate
         while line = stdout.gets
           @log.puts format_line(name, line)
         end
-        #status = Process.wait(pid)
-        #handle_child_termination(pid, status)
+        status = Process.wait(pid)
+        handle_child_termination(pid, status)
       end
     end
 
@@ -137,7 +98,8 @@ class Fate
           @pids_by_name.delete(name)
           @threads.delete(name)
           system "kill -s INT #{pid}"
-          puts colorize("yellow", format_line("Fate", "Sent a kill signal to #{name} running at #{pid}"))
+          puts colorize "yellow",
+            format_line("Fate", "Sent a kill signal to #{name} running at #{pid}")
         end
       end
 
@@ -158,6 +120,27 @@ class Fate
     def running
       names = @pids_by_name.map {|name, command| name }.sort
     end
+
+    private
+
+    def handle_child_termination(pid, status)
+      if name = @names_by_pid.delete(pid)
+        @pids_by_name.delete(name)
+        # TODO: CLI and instantiation flags for @mode
+        if (@mode != :production) && status.exitstatus != 0
+          down_in_flames(name, pid, status)
+        else
+          # Probably should notify somebody somehow
+        end
+      end
+    end
+
+    def down_in_flames(name, pid, status)
+      puts "Process '#{name}' (pid #{pid}) exited with code #{status}:"
+      puts "Shutting down all processes."
+      exit(status.exitstatus)
+    end
+
 
     # ad hoc shell out, with rescuing because of some apparent bugs
     # in MRI 1.8.7's ability to cope with unusual exit codes.

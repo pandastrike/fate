@@ -15,6 +15,10 @@ class Fate
       exit
     end
 
+    on("stop") do
+      self.stop
+    end
+
     on(/^stop (\S+)$/) do |args|
       command = args.first
       self.stop_command(args.first)

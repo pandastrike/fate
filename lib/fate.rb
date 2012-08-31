@@ -54,13 +54,37 @@ class Fate
     @name_pids = {}
   end
 
-  def start(&block)
-    manager.spawn_commands(@name_commands)
+  def run(&block)
+    start
     if block
       yield(self)
       manager.stop
     end
   end
+
+  def start
+    manager.start_group(@name_commands, :block)
+    message = format_line("Fate", "All commands are running. ")
+    puts colorize("green", message)
+  end
+
+  def stop
+    keys = @name_commands.keys
+    # presuming the spec file ordered the commands where the dependencies
+    # come before the dependers, we should stop the processes in reverse order,
+    # then start them back up again in forward order.
+    names = manager.running.sort_by {|name| keys.index(name) }
+    names.reverse.each do |name|
+      manager.stop_command(name)
+    end
+  end
+
+  def restart
+    stop
+    sleep 0.5
+    start
+  end
+
 
   def start_command(name)
     if command = @name_commands[name]
@@ -85,22 +109,6 @@ class Fate
 
   def running
     manager.running
-  end
-
-  def restart
-    keys = @name_commands.keys
-    # presuming the spec file ordered the commands where the dependencies
-    # come before the dependers, we should stop the processes in reverse order,
-    # then start them back up again in forward order.
-    names = manager.running.sort_by {|name| keys.index(name) }
-    names.reverse.each do |name|
-      manager.stop_command(name)
-    end
-    sleep 0.2
-    names.each do |name|
-      command = @name_commands[name]
-      manager.start_command(name, command)
-    end
   end
 
   # ad hoc shell out, with rescuing because of some apparent bugs
