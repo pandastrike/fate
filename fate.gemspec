@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.require_path = "lib"
   s.executables = "fate"
 
-  s.add_dependency("consolize", ">=0.2.0")
+  s.add_dependency("harp", ">=0.2.4")
   s.add_dependency("open4", ">=1.3.0")
   s.add_dependency("squeeze", ">=0.2.0")
   s.add_dependency("term-ansicolor", ">=1.0.0")

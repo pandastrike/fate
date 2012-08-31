@@ -34,12 +34,9 @@ class Fate
           sleep 1
           retry
         end
-        #message = format_line("Fate", "thread with Process.wait2")
-        #puts colorize("red", message)
         loop do
           # pid of -1 means to wait for any child process
           pid, status = Process.wait2(-1)
-          pp [pid, status]
           handle_child_termination(pid, status)
         end
       end

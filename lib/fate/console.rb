@@ -1,13 +1,13 @@
-gem "consolize"
-require "consolize"
+gem "harp"
+require "harp"
 class Fate
 
-  include Consolize
+  include Harp
 
-  setup_console do |console|
+  setup_repl do |repl|
 
     on("help") do
-      commands = console.commands.select {|c| c.size > 1 } + ["!"]
+      commands = repl.commands.select {|c| c.size > 1 } + ["!"]
       puts "* Available commands: " << commands.sort.join(" ")
     end
 

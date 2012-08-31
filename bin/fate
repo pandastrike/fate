@@ -33,6 +33,6 @@ end
 
 require "fate/console"
 fate.start
-fate.console
+fate.repl
 
 
