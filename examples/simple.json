@@ -1,0 +1,12 @@
+{
+  "commands": {
+    "one": "tail -f README.md",
+    "two": "tail -f README.md",
+    "colors": {
+      "red": "tail -f README.md",
+      "blue": "tail -f README.md"
+    }
+  }
+}
+
+
