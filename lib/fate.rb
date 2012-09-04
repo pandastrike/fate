@@ -11,28 +11,23 @@ require "fate/manager"
 Thread.abort_on_exception = true
 
 class Fate
-
-  class CommandRegistry
-    # TODO
-  end
-
   include Formatter
 
-  def self.start(configuration, &block)
-    self.new(configuration).start(&block)
+  def self.start(specification, &block)
+    self.new(specification).start(&block)
   end
 
-  attr_reader :manager, :configuration, :completions, :name_commands
+  attr_reader :manager, :specification, :completions, :name_commands
 
-  def initialize(configuration, options={})
-    @configuration = configuration
+  def initialize(specification, options={})
+    @specification = specification
     @options = options
     if logfile = options[:service_log]
       @log = File.new(logfile, "a")
     else
       @log = STDOUT
     end
-    commands = Squeeze::HashTree[@configuration[:commands]]
+    commands = Squeeze::HashTree[@specification[:commands]]
 
     @completions = Set.new
 
@@ -47,11 +42,7 @@ class Fate
     end
     @command_width = @name_commands.keys.sort_by {|k| k.size }.last.size
 
-    @manager = Manager.new(:log => @log, :command_width => @command_width)
-
-    @threads = {}
-    @pid_names = {}
-    @name_pids = {}
+    @manager = Manager.new(@specification, :log => @log, :command_width => @command_width)
   end
 
   def run(&block)

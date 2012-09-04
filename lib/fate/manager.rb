@@ -14,8 +14,8 @@ class Fate
   class Manager
     include Formatter
 
-    def initialize(options)
-      @log = options[:log]
+    def initialize(specification, options)
+      @service_log = options[:log]
       @command_width = options[:command_width]
       @threads = {}
       @commands_by_name = {}
@@ -85,7 +85,7 @@ class Fate
         # signalling that it is ready.
         line = stdout.gets
         puts colorize("yellow", format_line("Fate Manager", "#{name} is running."))
-        @log.puts format_line(name, line)
+        @service_log.puts format_line(name, line)
         @threads[name] = Thread.current
         #@threads << Thread.current
 
