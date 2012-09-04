@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "fate"
-  s.version = "0.2.6"
+  s.version = "0.2.7"
   s.authors = ["Matthew King"]
   s.homepage = "https://github.com/automatthew/fate"
   s.summary = "Tool for running and interacting with a multi-process service"
@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.require_path = "lib"
   s.executables = "fate"
 
+  s.add_dependency("json", ">=1.7.5")
   s.add_dependency("harp", ">=0.2.4")
   s.add_dependency("open4", ">=1.3.0")
   s.add_dependency("squeeze", ">=0.2.0")

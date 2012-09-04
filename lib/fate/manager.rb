@@ -108,7 +108,7 @@ class Fate
       if name = @names_by_pid.delete(pid)
         @pids_by_name.delete(name)
         # TODO: CLI and instantiation flags for @mode
-        if (@mode != :production) && status.exitstatus != 0
+        if (@mode != :production) && status != 0
           down_in_flames(name, pid, status)
         else
           # Probably should notify somebody somehow
@@ -119,7 +119,7 @@ class Fate
     def down_in_flames(name, pid, status)
       puts "Process '#{name}' (pid #{pid}) exited with code #{status}:"
       puts "Shutting down all processes."
-      exit(status.exitstatus)
+      exit(status)
     end
 
 
