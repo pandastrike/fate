@@ -90,7 +90,7 @@ class Fate
         #@threads << Thread.current
 
         while line = stdout.gets
-          @log.puts format_line(name, line)
+          @service_log.puts format_line(name, line)
         end
         status = Process.wait(pid)
         handle_child_termination(pid, status)
