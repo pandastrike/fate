@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
     LICENSE
     README.md
     lib/fate.rb
-    lib/fate/console.rb
+    lib/fate/repl.rb
   ]
   s.require_path = "lib"
   s.executables = "fate"
