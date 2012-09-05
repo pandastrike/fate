@@ -5,44 +5,33 @@ gem "squeeze"
 require "term/ansicolor"
 require "squeeze/hash_tree"
 
-require "fate/formatter"
+require "fate/logger"
+require "fate/service"
 require "fate/manager"
 
 Thread.abort_on_exception = true
 
 class Fate
-  include Formatter
 
   def self.start(specification, &block)
     self.new(specification).start(&block)
   end
 
-  attr_reader :manager, :specification, :completions, :name_commands
+  attr_reader :service, :manager, :completions, :logger
 
-  def initialize(specification, options={})
-    @specification = specification
-    @options = options
-    if logfile = options[:service_log]
-      @log = File.new(logfile, "a")
-    else
-      @log = STDOUT
-    end
-    commands = Squeeze::HashTree[@specification[:commands]]
+  def initialize(spec, options={})
+    @service = Service.new(spec, options)
+    @completions = @service.completions
+    @command_width = @service.longest_name
 
-    @completions = Set.new
+    @spec = spec
+    @logger = @service.logger("Fate Control")
 
-    @name_commands = {}
-    commands.each_path do |path, value|
-      key = path.join(".")
-      # add dot-delimited command names to the completions
-      @completions += path.map {|s| s.to_s }
-      @completions << key
-      # register each command under the dot-delimited name
-      @name_commands[key] = value
-    end
-    @command_width = @name_commands.keys.sort_by {|k| k.size }.last.size
+    @manager = Manager.new(@service)
+  end
 
-    @manager = Manager.new(@specification, :log => @log, :command_width => @command_width)
+  def log(*args, &block)
+    @logger.log(*args, &block)
   end
 
   def run(&block)
@@ -54,18 +43,13 @@ class Fate
   end
 
   def start
-    manager.start_group(@name_commands)
-    message = format_line("Fate Control", "All commands are running. ")
-    puts colorize("green", message)
+    manager.start_group(@service.commands)
+    logger.green "All commands are running."
   end
 
   def stop
-    keys = @name_commands.keys
-    # presuming the spec file ordered the commands where the dependencies
-    # come before the dependers, we should stop the processes in reverse order,
-    # then start them back up again in forward order.
-    names = manager.running.sort_by {|name| keys.index(name) }
-    names.reverse.each do |name|
+    ordered = @service.stop_order(manager.running)
+    ordered.each do |name|
       manager.stop_command(name)
     end
   end
@@ -77,34 +61,20 @@ class Fate
     start
   end
 
-  def resolve_commands(name)
-    targets = []
-    if @name_commands.has_key?(name)
-      targets << name
-    else
-      @name_commands.each do |cname, _command|
-        if cname.split(".").first == name
-          targets << cname
-        end
-      end
-    end
-    targets
-  end
-
   def start_command(spec)
-    names = resolve_commands(spec)
+    names = @service.resolve_commands(spec)
     if names.empty?
       puts "No commands found for: #{spec}"
     else
       names.each do |name|
-        command = @name_commands[name]
+        command = @service.commands[name]
         manager.start_command(name, command)
       end
     end
   end
 
   def stop_command(spec)
-    names = resolve_commands(spec)
+    names = @service.resolve_commands(spec)
     if names.empty?
       puts "No commands found for: #{spec}"
     else

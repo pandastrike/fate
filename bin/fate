@@ -12,7 +12,8 @@ $LOAD_PATH.unshift("#{FATE_ROOT}/lib")
 require "fate"
 
 options = {
-  :configuration => "fate.json"
+  :configuration => "fate.json",
+  :log => STDOUT
 }
 
 # TODO: config file flag
@@ -20,14 +21,18 @@ OptionParser.new do |parser|
   parser.on("-c", "--configuration=FILE", "The origin of the events") do |file|
     options[:configuration] = file
   end
+  parser.on("-l", "--log=FILE", "Processes log to FILE") do |file|
+    options[:log] = File.new(file, "a")
+  end
 end.parse!
 
 
 string = File.read(options[:configuration])
 configuration = JSON.parse(string, :symbolize_names => true)
-fate = Fate.new(configuration)
+fate = Fate.new(configuration, options)
 
 trap("INT") do
+  fate.stop
   exit
 end
 

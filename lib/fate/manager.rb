@@ -1,7 +1,6 @@
 require "pp"
 # Cross-VM compatibility
 # thanks to http://ku1ik.com/2010/09/18/open3-and-the-pid-of-the-spawn.html
-# TODO: consider using systemu: https://github.com/ahoward/systemu/
 if IO.respond_to?(:popen4)
   def open4(*args)
     IO.popen4(*args)
@@ -12,11 +11,13 @@ end
 
 class Fate
   class Manager
-    include Formatter
 
-    def initialize(specification, options)
-      @service_log = options[:log]
-      @command_width = options[:command_width]
+    attr_reader :logger
+    def initialize(service, options={})
+      @service = service
+      @command_width = @service.longest_name
+      @logger = @service.logger("Fate Manager")
+
       @threads = {}
       @commands_by_name = {}
       @names_by_pid = {}
@@ -24,6 +25,9 @@ class Fate
       at_exit { stop }
     end
 
+    def log(*args, &block)
+      @logger.log(*args, &block)
+    end
 
     def stop
       @names_by_pid.each do |pid, name|
@@ -44,7 +48,7 @@ class Fate
 
     def start_command(name, command)
       if pid = @pids_by_name[name]
-        puts "#{name} is already running with pid #{pid}"
+        logger.error "'#{name}' is already running with pid #{pid}"
       else
         spawn(name, command)
       end
@@ -56,10 +60,9 @@ class Fate
         @pids_by_name.delete(name)
         @threads.delete(name)
         system "kill -s INT #{pid}"
-        puts colorize "yellow",
-          format_line("Fate Manager", "Sent a kill signal to #{name} running at #{pid}")
+        logger.info "Sent a kill signal to '#{name}' running at #{pid}"
       else
-        puts "Could not find pid for #{name}"
+        logger.error "Could not find pid for '#{name}'"
       end
     end
 
@@ -70,29 +73,31 @@ class Fate
     def spawn(name, command)
       # TODO: check to see if command is already running
       return Thread.new do
+        process_logger = @service.logger(name)
+
         pid, stdin, stdout, stderr = open4(command)
-        puts colorize("yellow", format_line("Fate Manager", "Starting (#{pid}): #{name}"))
+        logger.info "Starting (#{pid}): #{name}"
         @names_by_pid[pid] = name
         @pids_by_name[name] = pid
 
         Thread.new do
           while line = stderr.gets
-            STDERR.puts "(#{name}) #{line}"
+            # TODO: test me
+            process_logger.error(line)
           end
         end
 
         # First line written to STDOUT is interpreted as the service
         # signalling that it is ready.
         line = stdout.gets
-        puts colorize("yellow", format_line("Fate Manager", "#{name} is running."))
-        @service_log.puts format_line(name, line)
+        logger.info "#{name} is running."
+        process_logger.log(line)
         @threads[name] = Thread.current
-        #@threads << Thread.current
 
         while line = stdout.gets
-          @service_log.puts format_line(name, line)
+          process_logger.log(line)
         end
-        status = Process.wait(pid)
+        pid, status = Process.wait2(pid)
         handle_child_termination(pid, status)
       end
     end
@@ -117,9 +122,13 @@ class Fate
     end
 
     def down_in_flames(name, pid, status)
-      puts "Process '#{name}' (pid #{pid}) exited with code #{status}:"
-      puts "Shutting down all processes."
-      exit(status)
+      if status.exitstatus
+        logger.error "Process '#{name}' (pid #{pid}) exited with code #{status.exitstatus}."
+      else
+        logger.info "Process '#{name}' (pid #{pid}) was sent signal #{status.termsig}."
+      end
+      logger.info "Shutting down all processes."
+      exit(1)
     end
 
 

@@ -43,7 +43,7 @@ class Fate
     end
 
     on("commands") do
-      puts JSON.pretty_generate(self.name_commands)
+      puts self.service.names
     end
 
     on("running") do
@@ -51,7 +51,7 @@ class Fate
     end
 
     on("configuration", "config") do
-      puts JSON.pretty_generate(configuration)
+      puts JSON.pretty_generate(self.service.specification)
     end
 
   end
