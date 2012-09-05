@@ -1,0 +1,199 @@
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+require "json"
+string = File.read("service.json")
+configuration = JSON.parse(string, :symbolize_names => true)
+spawner = Fate.new(configuration, :service_log => "logs/service.log")
+
+spawner.start do
+  # run your tests
+  # when this block finishes evaluation, Fate shuts down the service
+end
+```
+one 1
+one 1
+test/driver.rb:8:in `sleep': Interrupt
+	from test/driver.rb:8:in `block in <main>'
+	from test/driver.rb:5:in `loop'
+	from test/driver.rb:5:in `<main>'
+one 1
+one 2
+one 3
+one 4
+test/driver.rb:8:in `sleep': Interrupt
+	from test/driver.rb:8:in `block in <main>'
+	from test/driver.rb:5:in `loop'
+	from test/driver.rb:5:in `<main>'
+one 1
+one 2
+one 3
+one 4
+test/driver.rb:8:in `sleep': Interrupt
+	from test/driver.rb:8:in `block in <main>'
+	from test/driver.rb:5:in `loop'
+	from test/driver.rb:5:in `<main>'
+Test one 1
+Test one 2
+Test one 3
+Test one 4
+Test one 5
+test/driver.rb:8:in `sleep': Interrupt
+	from test/driver.rb:8:in `block in <main>'
+	from test/driver.rb:5:in `loop'
+	from test/driver.rb:5:in `<main>'
+Test one 1
+Test one 2
+Test one 3
+Test one 4
+test/driver.rb:8:in `sleep': Interrupt
+	from test/driver.rb:8:in `block in <main>'
+	from test/driver.rb:5:in `loop'
+	from test/driver.rb:5:in `<main>'

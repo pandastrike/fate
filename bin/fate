@@ -13,7 +13,7 @@ require "fate"
 
 options = {
   :configuration => "fate.json",
-  :log => STDOUT
+  :default_log => STDOUT
 }
 
 # TODO: config file flag
@@ -22,7 +22,7 @@ OptionParser.new do |parser|
     options[:configuration] = file
   end
   parser.on("-l", "--log=FILE", "Processes log to FILE") do |file|
-    options[:log] = File.new(file, "a")
+    options[:default_log] = File.new(file, "a")
   end
 end.parse!
 
@@ -31,10 +31,7 @@ string = File.read(options[:configuration])
 configuration = JSON.parse(string, :symbolize_names => true)
 fate = Fate.new(configuration, options)
 
-trap("INT") do
-  fate.stop
-  exit
-end
+
 
 require "fate/repl"
 fate.start

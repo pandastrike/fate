@@ -6,6 +6,7 @@ class Fate
     def initialize(specification, options)
       @specification = specification
       @options = options
+      @default_log = options[:default_log]
 
       @commands = process_commands(@specification[:commands])
       @names = @commands.keys
@@ -23,6 +24,20 @@ class Fate
         )
       }
       @loggers.merge!(options[:loggers]) if options[:loggers]
+      default_logger = @loggers["default"]
+      @names.each do |name|
+        if !@loggers[name]
+          if default_logger
+            @loggers[name] = default_logger
+          else
+            @loggers[name] = Fate::Logger.new(
+              :io => @default_log,
+              :name => name,
+              :width => @longest_name
+            )
+          end
+        end
+      end
     end
 
     def process_commands(hash)
@@ -42,12 +57,13 @@ class Fate
     end
 
     def logger(name)
-      @loggers[name] ||=
-        Fate::Logger.new(
-          :io => @options[:log],
-          :name => name,
-          :width => @longest_name
-        )
+      @loggers[name]
+      #@loggers[name] ||=
+        #Fate::Logger.new(
+          #:io => @default_log,
+          #:name => name,
+          #:width => @longest_name
+        #)
     end
 
     def resolve_commands(name)

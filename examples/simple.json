@@ -1,11 +1,16 @@
 {
   "commands": {
-    "one": "tail -f README.md",
-    "two": "tail -f README.md",
+    "one": "test/driver.rb one",
+    "two": "test/driver.rb two",
     "colors": {
-      "red": "tail -f README.md",
-      "blue": "tail -f README.md"
+      "vermilion": "test/driver.rb vermilion",
+      "green": "test/driver.rb green",
+      "blue": "test/driver.rb blue"
     }
+  },
+  "groups": {
+    "numbers": ["one", "two"],
+    "happy_colors": ["colors.vermilion", "colors.green"]
   }
 }
 

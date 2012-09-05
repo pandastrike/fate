@@ -22,7 +22,9 @@ class Fate
       @commands_by_name = {}
       @names_by_pid = {}
       @pids_by_name = {}
-      at_exit { stop }
+      at_exit do
+        stop
+      end
     end
 
     def log(*args, &block)
@@ -83,7 +85,7 @@ class Fate
         Thread.new do
           while line = stderr.gets
             # TODO: test me
-            process_logger.error(line)
+            process_logger.log(line)
           end
         end
 

@@ -1,5 +1,18 @@
 class Fate
 
+  class LogRelay
+    def initialize(file)
+      @file = File.new(file, "a")
+    end
+
+    def log(string)
+      @file.puts string
+      @file.flush
+    end
+  end
+
+  # Simple logging class designed to interleave the output from multiple
+  # commands in a fashion similar to `tail` given multiple arguments
   class Logger
     def initialize(options)
       @name = options[:name]
