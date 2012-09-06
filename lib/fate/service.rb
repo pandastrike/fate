@@ -7,12 +7,12 @@ class Fate
     def initialize(specification, options)
       @specification = specification
       @options = options
-      @output_handlers = Output::Handlers.new(self, options[:output] || {})
 
       @commands = process_commands(@specification[:commands])
       @names = @commands.keys
       @longest_name = @commands.keys.sort_by {|k| k.size }.last.size
       @logger = Fate::MultiLogger.new(:io => STDOUT, :width => @longest_name)
+      @output_handlers = Output::Handlers.new(self, options[:output] || {})
     end
 
     def process_commands(hash)

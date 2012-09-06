@@ -8,56 +8,68 @@ class Fate
         @handlers = handlers
       end
 
-      def relay(name, string)
+      def [](name)
         if handler = @handlers[name]
-          handler.puts(string)
-        elsif handler = @handlers["default"]
-          handler.relay(name, string)
+          handler
+        elsif @handlers["default"]
+          @handlers[name] = @handlers["default"][name]
         else
-          @service.logger.write(name, string)
+          @handlers[name] = @service.logger[name]
         end
       end
 
     end
 
-    class Relay
-      def initialize(options)
-        if file = options[:file]
-          @io = File.new(file, "a")
-        elsif io = options[:io]
-          @io = io
-        end
+    class IOFilter
+      def initialize(master, name)
+        @master = master
+        @name = name
       end
 
-      def puts(string)
-        @io.puts string
-        @io.flush
+      def write(string)
+        @master.io.flush
+        @master.io.write(format(@name, string))
+      end
+
+      def method_missing(method, *args, &block)
+        if @master.io.respond_to?(method)
+          @master.io.send(method, *args, &block)
+        else
+          super
+        end
       end
     end
 
-    class MultiRelay
-
+    class IOMux
+      attr_reader :io
+      attr_accessor :last_identifier
       def initialize(options)
+        @last_identifier = nil
         if file = options[:file]
           @io = File.new(file, "a")
         elsif io = options[:io]
           @io = io
         end
+        @handlers = {}
       end
 
-      def relay(name, string)
-        @io.puts(format_line(name, string))
-        @io.flush
+      def [](name)
+        @handlers[name] ||= NamedIO.new(self, name)
       end
 
-      def format_line(name, string)
-        if name == @last_identifier
-          string
-        else
-          @last_identifier = name
-          "==> #{name} <==\n#{string}"
+      class NamedIO < IOFilter
+
+        def format(name, string)
+          if name == @master.last_identifier
+            string
+          else
+            @master.last_identifier = name
+            "==> #{name} <==\n#{string}"
+          end
         end
+
       end
+
     end
 
   end

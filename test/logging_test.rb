@@ -12,14 +12,13 @@ require "fate"
 string = File.read("examples/simple.json")
 configuration = JSON.parse(string, :symbolize_names => true)
 
-color_output = Fate::Output::Relay.new(:file => "test/logs/colors.log")
+color_output = File.new("test/logs/colors.log", "a")
 
 fate = Fate.new(
   configuration,
   :output => {
-    "default" => Fate::Output::MultiRelay.new(:file => "test/logs/default.log"),
-    "one" => Fate::Output::Relay.new(:file => "test/logs/one.log"),
-    "two" => Fate::Output::Relay.new(:file => "test/logs/two.log"),
+    "default" => Fate::Output::IOMux.new(:file => "test/logs/default.log"),
+    "one" => File.new("test/logs/one.log", "a"),
     "colors.vermilion" => color_output,
     "colors.green" => color_output
   }

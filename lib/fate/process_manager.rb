@@ -1,3 +1,4 @@
+require "fileutils"
 require "pp"
 # Cross-VM compatibility
 # thanks to http://ku1ik.com/2010/09/18/open3-and-the-pid-of-the-spawn.html
@@ -31,6 +32,7 @@ class Fate
     end
 
     def stop
+      # FIXME: race condition involving spawn and stop at the same time
       @names_by_pid.each do |pid, name|
         kill(name)
       end
@@ -80,10 +82,9 @@ class Fate
         @names_by_pid[pid] = name
         @pids_by_name[name] = pid
 
+        io = output_handlers[name]
         Thread.new do
-          while line = stderr.gets
-            output_handlers.relay(name, line)
-          end
+          IO.copy_stream(stderr, io)
         end
 
         # First line written to STDOUT is interpreted as the service
@@ -91,12 +92,10 @@ class Fate
         line = stdout.gets
         logger.info "#{name} is running."
 
-        output_handlers.relay(name, line)
+        io.write(line)
         @threads[name] = Thread.current
 
-        while line = stdout.gets
-          output_handlers.relay(name, line)
-        end
+        IO.copy_stream(stdout, io)
         pid, status = Process.wait2(pid)
         handle_child_termination(pid, status)
       end
@@ -135,11 +134,11 @@ class Fate
     # ad hoc shell out, with rescuing because of some apparent bugs
     # in MRI 1.8.7's ability to cope with unusual exit codes.
     def system(command)
-      begin
+      #begin
         Kernel.system command
-      rescue => error
-        puts "Exception raised when executing '#{command}': #{error.inspect}"
-      end
+      #rescue => error
+        #puts "Exception raised when executing '#{command}': #{error.inspect}"
+      #end
     end
 
 
