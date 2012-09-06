@@ -10,12 +10,14 @@ else
 end
 
 class Fate
+
+  # A process management tool, concerned primarily with spawning child
+  # processes, tracking them by name, and handling unexpected exits and signals.
   class Manager
 
     attr_reader :logger
-    def initialize(service, options={})
+    def initialize(service)
       @service = service
-      @command_width = @service.longest_name
       @logger = @service.logger("Fate Manager")
 
       @threads = {}
@@ -28,7 +30,7 @@ class Fate
     end
 
     def log(*args, &block)
-      @logger.log(*args, &block)
+      logger.log(*args, &block)
     end
 
     def stop
@@ -84,7 +86,6 @@ class Fate
 
         Thread.new do
           while line = stderr.gets
-            # TODO: test me
             process_logger.log(line)
           end
         end

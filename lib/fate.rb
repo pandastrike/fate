@@ -7,7 +7,7 @@ require "squeeze/hash_tree"
 
 require "fate/logger"
 require "fate/service"
-require "fate/manager"
+require "fate/process_manager"
 
 Thread.abort_on_exception = true
 
