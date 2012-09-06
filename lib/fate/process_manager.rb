@@ -13,12 +13,13 @@ class Fate
 
   # A process management tool, concerned primarily with spawning child
   # processes, tracking them by name, and handling unexpected exits and signals.
-  class Manager
+  class ProcessManager
 
-    attr_reader :logger
+    attr_reader :logger, :output_handlers
     def initialize(service)
       @service = service
-      @logger = @service.logger("Fate Manager")
+      @output_handlers = @service.output_handlers
+      @logger = @service.logger["Fate Manager"]
 
       @threads = {}
       @commands_by_name = {}
@@ -27,10 +28,6 @@ class Fate
       at_exit do
         stop
       end
-    end
-
-    def log(*args, &block)
-      logger.log(*args, &block)
     end
 
     def stop
@@ -77,16 +74,15 @@ class Fate
     def spawn(name, command)
       # TODO: check to see if command is already running
       return Thread.new do
-        process_logger = @service.logger(name)
 
         pid, stdin, stdout, stderr = open4(command)
-        logger.info "Starting (#{pid}): #{name}"
+        logger.info "Starting '#{name}' (pid #{pid})"
         @names_by_pid[pid] = name
         @pids_by_name[name] = pid
 
         Thread.new do
           while line = stderr.gets
-            process_logger.log(line)
+            output_handlers.relay(name, line)
           end
         end
 
@@ -94,11 +90,12 @@ class Fate
         # signalling that it is ready.
         line = stdout.gets
         logger.info "#{name} is running."
-        process_logger.log(line)
+
+        output_handlers.relay(name, line)
         @threads[name] = Thread.current
 
         while line = stdout.gets
-          process_logger.log(line)
+          output_handlers.relay(name, line)
         end
         pid, status = Process.wait2(pid)
         handle_child_termination(pid, status)

@@ -7,6 +7,7 @@ require "squeeze/hash_tree"
 
 require "fate/logger"
 require "fate/service"
+require "fate/output"
 require "fate/process_manager"
 
 Thread.abort_on_exception = true
@@ -22,12 +23,11 @@ class Fate
   def initialize(spec, options={})
     @service = Service.new(spec, options)
     @completions = @service.completions
-    @command_width = @service.longest_name
 
     @spec = spec
-    @logger = @service.logger("Fate Control")
+    @logger = @service.logger["Fate Control"]
 
-    @manager = Manager.new(@service)
+    @manager = ProcessManager.new(@service)
   end
 
   def log(*args, &block)

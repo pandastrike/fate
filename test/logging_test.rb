@@ -12,24 +12,23 @@ require "fate"
 string = File.read("examples/simple.json")
 configuration = JSON.parse(string, :symbolize_names => true)
 
-color_logger = Fate::LogRelay.new("test/logs/colors.log")
+color_output = Fate::Output::Relay.new(:file => "test/logs/colors.log")
 
 fate = Fate.new(
   configuration,
-  :default_log => STDOUT,
-  :loggers => {
-    "default" => Fate::LogRelay.new("test/logs/default.log"),
-    "one" => Fate::LogRelay.new("test/logs/one.log"),
-    "two" => Fate::LogRelay.new("test/logs/two.log"),
-    "colors.vermilion" => color_logger,
-    "colors.green" => color_logger
+  :output => {
+    "default" => Fate::Output::MultiRelay.new(:file => "test/logs/default.log"),
+    "one" => Fate::Output::Relay.new(:file => "test/logs/one.log"),
+    "two" => Fate::Output::Relay.new(:file => "test/logs/two.log"),
+    "colors.vermilion" => color_output,
+    "colors.green" => color_output
   }
 )  
 
 
 fate.run do
-  puts "hello there"
-  sleep 5
+  puts "logging test says, 'hello, there'"
+  sleep 4
 end
 
 

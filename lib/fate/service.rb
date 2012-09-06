@@ -3,41 +3,16 @@ class Fate
   class Service
 
     attr_reader :longest_name, :names, :commands, :completions, :specification
+    attr_reader :output_handlers, :logger
     def initialize(specification, options)
       @specification = specification
       @options = options
-      @default_log = options[:default_log]
+      @output_handlers = Output::Handlers.new(self, options[:output] || {})
 
       @commands = process_commands(@specification[:commands])
       @names = @commands.keys
       @longest_name = @commands.keys.sort_by {|k| k.size }.last.size
-      @loggers = {
-        "Fate Control" => Fate::Logger.new(
-          :io => STDOUT,
-          :name => "Fate Control",
-          :width => @longest_name
-        ),
-        "Fate Manager" => Fate::Logger.new(
-          :io => STDOUT,
-          :name => "Fate Manager",
-          :width => @longest_name
-        )
-      }
-      @loggers.merge!(options[:loggers]) if options[:loggers]
-      default_logger = @loggers["default"]
-      @names.each do |name|
-        if !@loggers[name]
-          if default_logger
-            @loggers[name] = default_logger
-          else
-            @loggers[name] = Fate::Logger.new(
-              :io => @default_log,
-              :name => name,
-              :width => @longest_name
-            )
-          end
-        end
-      end
+      @logger = Fate::MultiLogger.new(:io => STDOUT, :width => @longest_name)
     end
 
     def process_commands(hash)
@@ -54,16 +29,6 @@ class Fate
         out[key] = value
       end
       out
-    end
-
-    def logger(name)
-      @loggers[name]
-      #@loggers[name] ||=
-        #Fate::Logger.new(
-          #:io => @default_log,
-          #:name => name,
-          #:width => @longest_name
-        #)
     end
 
     def resolve_commands(name)
