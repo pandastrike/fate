@@ -20,17 +20,25 @@ class Fate
     end
 
     class Sublogger
-      def initialize(multi_logger, name)
-        @multi_logger = multi_logger
+      def initialize(master, name)
+        @master = master
+        @io = @master.io
         @name = name
       end
 
+      # duck typing for IO
+      def write(string)
+        num = @io.write(@master.format(@name, string))
+        @io.flush
+        num
+      end
+
       def method_missing(method, *args, &block)
-        if @multi_logger.respond_to?(method)
+        if @master.respond_to?(method)
           # insert this logger's name into every relayed call.
-          @multi_logger.send(method, @name, *args, &block)
-        elsif @multi_logger.io.respond_to?(method)
-          @multi_logger.io.send(method, *args, &block)
+          @master.send(method, @name, *args, &block)
+        elsif @io.respond_to?(method)
+          @io.send(method, *args, &block)
         else
           super
         end

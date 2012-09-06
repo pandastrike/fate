@@ -23,17 +23,20 @@ class Fate
     class IOFilter
       def initialize(master, name)
         @master = master
+        @io = @master.io
         @name = name
       end
 
+      # duck typing for IO
       def write(string)
-        @master.io.flush
-        @master.io.write(format(@name, string))
+        num = @io.write(@master.format(@name, string))
+        @io.flush
+        num
       end
 
       def method_missing(method, *args, &block)
-        if @master.io.respond_to?(method)
-          @master.io.send(method, *args, &block)
+        if @io.respond_to?(method)
+          @io.send(method, *args, &block)
         else
           super
         end
@@ -54,21 +57,18 @@ class Fate
       end
 
       def [](name)
-        @handlers[name] ||= NamedIO.new(self, name)
+        @handlers[name] ||= IOFilter.new(self, name)
       end
 
-      class NamedIO < IOFilter
-
-        def format(name, string)
-          if name == @master.last_identifier
-            string
-          else
-            @master.last_identifier = name
-            "==> #{name} <==\n#{string}"
-          end
+      def format(name, string)
+        if name == @last_identifier
+          string
+        else
+          @last_identifier = name
+          "==> #{name} <==\n#{string}"
         end
-
       end
+
 
     end
 
