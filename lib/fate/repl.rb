@@ -1,56 +1,53 @@
-gem "harp"
+#gem "harp"
+$:.unshift "/Users/mking/projects/oss/harp/lib"
 require "harp"
 class Fate
 
   include Harp
 
-  setup_repl do |repl|
+  setup_harp do |harp|
 
-    on("help") do
-      commands = repl.commands.select {|c| c.size > 1 } + ["!"]
+    command("help") do
+      commands = harp.command_names.select {|c| c.size > 1 } + ["!"]
       puts "* Available commands: " << commands.sort.join(" ")
     end
 
-    on("quit", "q", "exit") do
+    command("quit") do
       exit
     end
 
-    on("stop") do
+    command("stop") do
       self.stop
     end
 
-    on(/^stop (\S+)$/) do |args|
+    command("stop", :process_name) do |args|
       command = args.first
       self.stop_command(args.first)
     end
 
-    on(/^start (\S+)$/) do |args|
+    command("start", :process_name) do |args|
       command = args.first
       self.start_command(args.first)
     end
 
-    on("restart") do
+    command("restart") do
       self.restart
     end
 
-    on(/restart (\S+)$/) do |args|
+    command("restart", :process_name) do |args|
       command = args.first
       self.restart_command(args.first)
     end
 
-    on_bang do |args|
-      self.system args.first
-    end
-
-    on("commands") do
+    command("commands") do
       puts self.service.names
     end
 
-    on("running") do
+    command("running") do
       puts self.running
     end
 
-    on("configuration", "config") do
+    command("configuration") do
       puts JSON.pretty_generate(self.service.specification)
     end
 
