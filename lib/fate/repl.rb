@@ -12,7 +12,7 @@ class Fate
       puts "* Available commands: " << commands.sort.join(" ")
     end
 
-    command("quit") do
+    command("quit", :alias => "q") do
       exit
     end
 
