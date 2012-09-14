@@ -1,14 +1,4 @@
-require "fileutils"
 require "pp"
-# Cross-VM compatibility
-# thanks to http://ku1ik.com/2010/09/18/open3-and-the-pid-of-the-spawn.html
-if IO.respond_to?(:popen4)
-  def open4(*args)
-    IO.popen4(*args)
-  end
-else
-  require 'open4'
-end
 
 class Fate
 
@@ -74,30 +64,26 @@ class Fate
     end
 
     def spawn(name, command)
-      # TODO: check to see if command is already running
       return Thread.new do
 
-        pid, stdin, stdout, stderr = open4(command)
+        handler = output_handlers[name]
+        pipe = IO.popen(command, "r", :err => :out)
+        pid = pipe.pid
         logger.info "Starting '#{name}' (pid #{pid})"
         @names_by_pid[pid] = name
         @pids_by_name[name] = pid
 
-        io = output_handlers[name]
-        Thread.new do
-          IO.copy_stream(stderr, io)
-        end
-
-        # First line written to STDOUT is interpreted as the service
+        # First line written to STDOUT is assumed to be the service
         # signalling that it is ready.
-        line = stdout.gets
+        line = pipe.gets
         logger.info "#{name} is running."
-
-        io.write(line)
+        handler.write(line)
         @threads[name] = Thread.current
 
-        IO.copy_stream(stdout, io)
+        IO.copy_stream(pipe, handler)
         pid, status = Process.wait2(pid)
         handle_child_termination(pid, status)
+
       end
     end
 

@@ -28,6 +28,7 @@ class Fate
 
       # duck typing for IO
       def write(string)
+        return 0 unless string
         num = @io.write(@master.format(@name, string))
         @io.flush
         num
