@@ -8,6 +8,7 @@ class Fate
 
     attr_reader :logger, :output_handlers
     def initialize(service)
+      @mutex = Mutex.new
       @service = service
       @output_handlers = @service.output_handlers
       @logger = @service.logger["Fate Manager"]
@@ -22,7 +23,6 @@ class Fate
     end
 
     def stop
-      # FIXME: race condition involving spawn and stop at the same time
       @names_by_pid.each do |pid, name|
         kill(name)
       end
@@ -70,15 +70,17 @@ class Fate
         pipe = IO.popen(command, "r", :err => :out)
         pid = pipe.pid
         logger.info "Starting '#{name}' (pid #{pid})"
-        @names_by_pid[pid] = name
-        @pids_by_name[name] = pid
-
         # First line written to STDOUT is assumed to be the service
         # signalling that it is ready.
         line = pipe.gets
         logger.info "#{name} is running."
         handler.write(line)
-        @threads[name] = Thread.current
+
+        @mutex.synchronize do
+          @names_by_pid[pid] = name
+          @pids_by_name[name] = pid
+          @threads[name] = Thread.current
+        end
 
         IO.copy_stream(pipe, handler)
         pid, status = Process.wait2(pid)
