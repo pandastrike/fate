@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.12
+
+* Fixed another race condition and improved shutdown process
+
 ## 0.2.11
 
 * Fixed #4 - race condition during sudden shutdown

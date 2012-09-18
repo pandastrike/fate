@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "fate"
-  s.version = "0.2.11"
+  s.version = "0.2.12"
   s.authors = ["Matthew King"]
   s.homepage = "https://github.com/automatthew/fate"
   s.summary = "Tool for running and interacting with a multi-process service"
