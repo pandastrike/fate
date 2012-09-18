@@ -35,16 +35,23 @@ class Fate
   end
 
   def run(&block)
-    start
-    if block
-      yield(self)
-      manager.stop
+    if start
+      if block
+        yield(self)
+        stop
+      end
+    else
+      logger.error "Failed to start"
     end
   end
 
   def start
-    manager.start_group(@service.commands)
-    logger.green "All commands are running."
+    if manager.start_group(@service.commands)
+      logger.green "All commands are running."
+      true
+    else
+      false
+    end
   end
 
   def stop
