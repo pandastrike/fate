@@ -97,11 +97,22 @@ class Fate
           end
           @threads[name] = Thread.current
 
-          IO.copy_stream(pipe, handler)
+          copy_stream(pipe, handler)
           pid, status = Process.wait2(pid)
           handle_child_termination(pid, status)
         end
 
+      end
+    end
+
+    # Replacement for IO.copy_stream, which is a native function.  We've been
+    # seeing segfaults when using it for lots of data.
+    def copy_stream(src, dest)
+      begin
+        while s = src.readpartial(1024)
+          dest.write(s)
+        end
+      rescue EOFError
       end
     end
 
