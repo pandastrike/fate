@@ -1,13 +1,10 @@
-require "set"
 
 gem "term-ansicolor"
-gem "squeeze"
+gem "json-schema"
 require "term/ansicolor"
-require "squeeze/hash_tree"
+require "json-schema"
 
-require "fate/logger"
 require "fate/service"
-require "fate/output"
 require "fate/process_manager"
 
 Thread.abort_on_exception = true
@@ -45,10 +42,10 @@ class Fate
     end
   end
 
-  def start(specs=[])
-    if specs.size > 0
-      specs.each do |spec|
-        self.start_command(spec)
+  def start(command_specs=[])
+    if command_specs.size > 0
+      command_specs.each do |command_spec|
+        self.start_command(command_spec)
       end
     else
       if manager.start_group(@service.commands)
@@ -74,10 +71,10 @@ class Fate
     start
   end
 
-  def start_command(spec)
-    names = @service.resolve_commands(spec)
+  def start_command(command_spec)
+    names = @service.resolve_commands(command_spec)
     if names.empty?
-      puts "No commands found for: #{spec}"
+      puts "No commands found for: #{command_spec}"
     else
       commands = {}
       names.each do |name|
@@ -85,17 +82,17 @@ class Fate
         commands[name] = command
       end
       if manager.start_group(commands)
-        logger.green "All commands in '#{spec}' running."
+        logger.green "All commands in '#{command_spec}' running."
       else
-        logger.red "Failed to start '#{spec}'."
+        logger.red "Failed to start '#{command_spec}'."
       end
     end
   end
 
-  def stop_command(spec)
-    names = @service.resolve_commands(spec)
+  def stop_command(command_spec)
+    names = @service.resolve_commands(command_spec)
     if names.empty?
-      puts "No commands found for: #{spec}"
+      puts "No commands found for: #{command_spec}"
     else
       names.each do |name|
         manager.stop_command(name)

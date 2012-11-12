@@ -1,16 +1,17 @@
 {
   "commands": {
-    "one": "test/driver.rb one",
-    "two": "test/driver.rb two",
+    "one": "test/processes/driver.rb one",
+    "two": "test/processes/driver.rb two",
     "colors": {
-      "vermilion": "test/driver.rb vermilion",
-      "green": "test/driver.rb green",
-      "blue": "test/driver.rb blue"
+      "vermilion": "test/processes/driver.rb vermilion",
+      "green": "test/processes/driver.rb green",
+      "blue": "test/processes/driver.rb blue"
     }
   },
   "groups": {
     "numbers": ["one", "two"],
-    "happy_colors": ["colors.vermilion", "colors.green"]
+    "happy_colors": ["colors.vermilion", "colors.green"],
+    "mixed": [ "one", "colors.blue" ]
   }
 }
 
