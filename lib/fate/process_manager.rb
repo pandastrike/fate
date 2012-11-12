@@ -28,6 +28,7 @@ class Fate
           kill(name)
         end
       end
+      exit(1)
     end
 
     def start_group(hash)

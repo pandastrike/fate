@@ -1,9 +1,0 @@
-{
-  "commands": {
-    "one": "ruby test/exiting.rb",
-    "two": "tail -f README.md"
-  }
-}
-
-
-

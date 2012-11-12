@@ -1,5 +1,4 @@
 require "rubygems"
-require "json"
 
 # set up loadpath
 here = File.dirname(__FILE__)
@@ -8,9 +7,12 @@ $LOAD_PATH.unshift("#{FATE_ROOT}/lib")
 
 require "fate"
 
-
-string = File.read("examples/simple.json")
-configuration = JSON.parse(string, :symbolize_names => true)
+configuration = {
+  :commands => {
+    :one => "ruby test/exiting.rb",
+    :two => "tail -f README.md"
+  }
+}
 
 color_output = File.new("test/logs/colors.log", "a")
 
