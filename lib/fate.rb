@@ -45,12 +45,18 @@ class Fate
     end
   end
 
-  def start
-    if manager.start_group(@service.commands)
-      logger.green "All commands are running."
-      true
+  def start(specs=[])
+    if specs.size > 0
+      specs.each do |spec|
+        self.start_command(spec)
+      end
     else
-      false
+      if manager.start_group(@service.commands)
+        logger.green "All commands are running."
+        true
+      else
+        false
+      end
     end
   end
 

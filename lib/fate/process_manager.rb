@@ -37,7 +37,7 @@ class Fate
         start_command(name, command) unless @down_in_flames
       end
 
-      until @threads.size == hash.size
+      until hash.keys.all? { |key| @threads[key] }
         return false if @down_in_flames
         sleep 0.1
       end

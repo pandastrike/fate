@@ -34,7 +34,7 @@ fate = Fate.new(configuration, options)
 
 
 require "fate/repl"
-fate.start
+fate.start(ARGV)
 fate.repl
 
 
