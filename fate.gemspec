@@ -17,5 +17,6 @@ Gem::Specification.new do |s|
   s.add_dependency("harp", "0.2.7")
   s.add_dependency("squeeze", ">=0.2.0")
   s.add_dependency("term-ansicolor", ">=1.0.0")
+  s.add_dependency("json-schema", ">=1.0.10")
 end
 
