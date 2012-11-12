@@ -119,7 +119,16 @@ class Fate
 
     # list currently running commands
     def running
-      names = @pids_by_name.map {|name, command| name }.sort
+      names = []
+      @names_by_pid.each do |pid, name|
+        begin
+          # Signal 0 checks for the process, but sends no signal.
+          Process.kill(0, pid)
+          names << name
+        rescue
+        end
+      end
+      names.sort
     end
 
     private
