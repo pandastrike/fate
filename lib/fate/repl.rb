@@ -1,5 +1,3 @@
-#gem "harp"
-$:.unshift "/Users/mking/projects/oss/harp/lib"
 require "harp"
 class Fate
 

@@ -1,5 +1,7 @@
 require "set"
 
+gem "json-schema"
+require "json-schema"
 gem "squeeze"
 require "squeeze/hash_tree"
 
@@ -92,7 +94,9 @@ class Fate
       if @commands.has_key?(name)
         targets << name
       elsif @groups.has_key?(name)
-        targets += @groups[name]
+        @groups[name].each do |gname|
+          targets += resolve_commands(gname)
+        end
       else
         @commands.each do |cname, _command|
           if cname.split(".").first == name

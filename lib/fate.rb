@@ -1,8 +1,6 @@
 
 gem "term-ansicolor"
-gem "json-schema"
 require "term/ansicolor"
-require "json-schema"
 
 require "fate/service"
 require "fate/process_manager"

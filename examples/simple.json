@@ -11,7 +11,8 @@
   "groups": {
     "numbers": ["one", "two"],
     "happy_colors": ["colors.vermilion", "colors.green"],
-    "mixed": [ "one", "colors.blue" ]
+    "mixed": [ "one", "colors.blue" ],
+    "levels": [ "one", "colors" ]
   }
 }
 

@@ -20,6 +20,7 @@ service = Fate::Service.new(
     "groups" => {
       "numbers" => ["one", "two"],
       "mixed" => ["one", "colors.blue"],
+      "levels" => ["one", "colors"],
     }
   },
   {}
@@ -42,6 +43,9 @@ describe "Fate::Service" do
 
     commands = service.resolve_commands("mixed")
     commands.sort.should == %w[ colors.blue one ]
+
+    commands = service.resolve_commands("levels")
+    commands.sort.should == %w[ colors.blue colors.red one ]
   end
 
 end
