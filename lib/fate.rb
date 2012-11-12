@@ -73,9 +73,15 @@ class Fate
     if names.empty?
       puts "No commands found for: #{spec}"
     else
+      commands = {}
       names.each do |name|
         command = @service.commands[name]
-        manager.start_command(name, command)
+        commands[name] = command
+      end
+      if manager.start_group(commands)
+        logger.green "All commands in '#{spec}' running."
+      else
+        logger.red "Failed to start '#{spec}'."
       end
     end
   end

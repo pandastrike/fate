@@ -18,11 +18,11 @@ class Fate
       @names_by_pid = {}
       @pids_by_name = {}
       at_exit do
-        stop
+        shutdown
       end
     end
 
-    def stop
+    def shutdown
       @mutex.synchronize do
         @names_by_pid.each do |pid, name|
           kill(name)
@@ -140,7 +140,7 @@ class Fate
       end
       logger.info "Shutting down all processes."
 
-      stop
+      shutdown
     end
 
 
