@@ -18,5 +18,6 @@ Gem::Specification.new do |s|
   s.add_dependency("squeeze", ">=0.2.0")
   s.add_dependency("term-ansicolor", ">=1.0.0")
   s.add_dependency("json-schema", ">=1.0.10")
+  s.add_development_dependency("starter", ">= 0.1.17")
 end
 
