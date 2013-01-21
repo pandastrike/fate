@@ -17,6 +17,7 @@ class Fate
       "properties" => {
         "commands" => {
           "type" => "object",
+          "required" => true,
           "additionalProperties" => {
             "type" => ["object", "string"]
           }
