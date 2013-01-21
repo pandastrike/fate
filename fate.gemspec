@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.executables = "fate"
 
   s.add_dependency("json", ">=1.7.5")
-  s.add_dependency("harp", "0.2.8")
+  s.add_dependency("harp", ">=0.2.9")
   s.add_dependency("squeeze", ">=0.2.0")
   s.add_dependency("term-ansicolor", ">=1.0.0")
   s.add_dependency("json-schema", ">=1.0.10")
