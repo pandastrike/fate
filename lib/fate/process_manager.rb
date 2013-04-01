@@ -7,7 +7,8 @@ class Fate
   class ProcessManager
 
     attr_reader :logger, :output_handlers
-    def initialize(service)
+    def initialize(service, options={})
+      @directory = options[:directory]
       @mutex = Mutex.new
       @service = service
       @output_handlers = @service.output_handlers
@@ -74,7 +75,13 @@ class Fate
         pid = nil
         @mutex.synchronize do
           unless @down_in_flames
-            pipe = IO.popen(command, "r", :err => :out)
+            if @directory
+              Dir.chdir @directory do
+                pipe = IO.popen(command, "r", :err => :out)
+              end
+            else
+              pipe = IO.popen(command, "r", :err => :out)
+            end
             pid = pipe.pid
             logger.info "Starting '#{name}' (pid #{pid})"
 

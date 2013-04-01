@@ -22,7 +22,7 @@ class Fate
     @spec = spec
     @logger = @service.logger["Fate Control"]
 
-    @manager = ProcessManager.new(@service)
+    @manager = ProcessManager.new(@service, options)
   end
 
   def log(*args, &block)

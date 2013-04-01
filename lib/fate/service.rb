@@ -38,6 +38,7 @@ class Fate
 
     attr_reader :names, :commands, :completions, :specification
     attr_reader :output_handlers, :logger
+
     def initialize(specification, options)
       stringify(specification)
 
