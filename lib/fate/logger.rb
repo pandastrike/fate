@@ -7,6 +7,7 @@ class Fate
 
     attr_reader :width, :io
     def initialize(options)
+      @disable_color = options[:disable_color]
       @width = options[:width]
       if file = options[:file]
         @io = File.new(file, "a")
@@ -47,7 +48,7 @@ class Fate
     end
 
     def write(name, string, color=nil)
-      if color
+      if color && !@disable_color
         line = colorize(color, format(name, string))
       else
         line = format(name, string)
@@ -58,7 +59,11 @@ class Fate
     end
 
     def error(name, string)
-      write(name, string, "red")
+      write(name, "ERROR: #{string}", "red")
+    end
+
+    def warn(name, string)
+      write(name, "WARN: #{string}", "magenta")
     end
 
     def green(name, string)
@@ -70,7 +75,7 @@ class Fate
     end
 
     def debug(name, string)
-      write(name, string)
+      write(name, string, "cyan")
     end
 
     def format(name, string)

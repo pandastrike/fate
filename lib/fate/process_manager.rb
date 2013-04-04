@@ -46,7 +46,7 @@ class Fate
 
     def start_command(name, command)
       if pid = @pids_by_name[name]
-        logger.error "'#{name}' is already running with pid #{pid}"
+        logger.warn "'#{name}' is already running with pid #{pid}"
       else
         spawn(name, command)
       end

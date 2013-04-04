@@ -58,7 +58,11 @@ class Fate
       @completions.merge @groups.keys
 
       @longest_name = @commands.keys.sort_by {|k| k.size }.last.size
-      @logger = Fate::MultiLogger.new(:io => STDOUT, :width => @longest_name)
+      @logger = Fate::MultiLogger.new(
+        :io => STDOUT,
+        :width => @longest_name,
+        :disable_color => options[:disable_color]
+      )
       @output_handlers = Output::Handlers.new(self, options[:output] || {})
     end
 
