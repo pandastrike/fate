@@ -104,8 +104,9 @@ class Fate
           targets += resolve_commands(gname)
         end
       else
+        regex = /^#{name}\..*/
         @commands.each do |cname, _command|
-          if cname.split(".").first == name
+          if cname =~ regex
             targets << cname
           end
         end
