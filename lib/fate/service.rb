@@ -86,10 +86,10 @@ class Fate
       @completions ||= Set.new
       hash.each_path do |path, value|
         key = path.join(".")
-        # add dot-delimited command names to the completions
-        @completions += path.map {|s| s.to_s }
-        @completions << key
-        # register each command under the dot-delimited name
+        # add dot-delimited process names to the completions
+        (path.size).times do |i|
+          @completions << path.slice(0..i).join(".")
+        end
         out[key] = value
       end
       out
