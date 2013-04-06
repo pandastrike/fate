@@ -36,7 +36,7 @@ class Fate
       self.restart_command(args.first)
     end
 
-    command("commands") do
+    command("processes") do
       puts self.service.names
     end
 

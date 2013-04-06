@@ -19,14 +19,15 @@ class Fate
       @names_by_pid = {}
       @pids_by_name = {}
       at_exit do
-        shutdown
+        stop_all
       end
     end
 
-    def shutdown
+    def stop_all
       @mutex.synchronize do
-        @names_by_pid.each do |pid, name|
-          kill(name)
+        ordered = @service.stop_order(running)
+        ordered.each do |name|
+          term(name)
         end
       end
     end
@@ -52,20 +53,28 @@ class Fate
       end
     end
 
-    def kill(name)
+    def stop_command(name)
+      term(name)
+    end
+
+    def term(name)
       if pid = @pids_by_name[name]
         @names_by_pid.delete(pid)
         @pids_by_name.delete(name)
         @threads.delete(name)
         system "kill -s TERM #{pid}"
         logger.info "Sent a kill signal to '#{name}' running at #{pid}"
+        begin
+          # Signal 0 checks for the process, but sends no signal.
+          Process.kill(0, pid)
+        rescue
+          # TODO: limit number of retries, possibly issue kill -9?
+          sleep 0.01
+          retry
+        end
       else
         logger.error "Could not find pid for '#{name}'"
       end
-    end
-
-    def stop_command(name)
-      kill(name)
     end
 
     def spawn(name, command)
@@ -155,7 +164,7 @@ class Fate
       end
       logger.info "Shutting down all processes."
 
-      shutdown
+      stop_all
       exit(1)
     end
 

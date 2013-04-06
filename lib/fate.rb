@@ -56,16 +56,11 @@ class Fate
   end
 
   def stop
-    ordered = @service.stop_order(manager.running)
-    ordered.each do |name|
-      manager.stop_command(name)
-    end
+    manager.stop_all
   end
 
   def restart
     stop
-    # FIXME: this is here to prevent redis-server from crying
-    sleep 0.5
     start
   end
 
@@ -82,7 +77,7 @@ class Fate
       if manager.start_group(commands)
         logger.green "All commands in '#{command_spec}' running."
       else
-        logger.red "Failed to start '#{command_spec}'."
+        logger.error "Failed to start '#{command_spec}'."
       end
     end
   end
