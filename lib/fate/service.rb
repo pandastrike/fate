@@ -95,6 +95,19 @@ class Fate
       out
     end
 
+    def resolve(specs)
+      command_names = []
+      specs.each do |spec|
+        names = resolve_commands(spec)
+        if names.empty?
+          logger.warn "Fate", "No commands found for: #{spec}"
+        else
+          command_names.concat(names)
+        end
+      end
+      names = command_names.uniq
+    end
+
     def resolve_commands(name)
       targets = []
       if @commands.has_key?(name)

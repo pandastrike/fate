@@ -6,7 +6,7 @@ class Fate
   # processes, tracking them by name, and handling unexpected exits and signals.
   class ProcessManager
 
-    attr_reader :logger, :output_handlers
+    attr_reader :logger, :output_handlers, :service
     def initialize(service, options={})
       @directory = options[:directory]
       @mutex = Mutex.new
@@ -19,30 +19,64 @@ class Fate
       @names_by_pid = {}
       @pids_by_name = {}
       at_exit do
-        stop_all
+        stop_group(running)
       end
     end
 
-    def stop_all
-      @mutex.synchronize do
-        ordered = @service.stop_order(running)
-        ordered.each do |name|
-          term(name)
-        end
+    def run(command_strings=[])
+      if command_strings.empty?
+        run(@service.commands.keys)
+      else
+        commands = @service.resolve(command_strings)
+        # don't need to start processes that are already running
+        noop = commands & running
+        to_start = commands - noop
+        to_stop = running - commands
+
+        stop_group(to_stop)
+        start_group(to_start)
       end
     end
 
-    def start_group(hash)
-      hash.each do |name, command|
+    def start(command_strings=[])
+      if command_strings.empty?
+        start_group(@service.commands.keys)
+      else
+        commands = @service.resolve(command_strings)
+        start_group(commands)
+      end
+    end
+
+    def stop(command_strings=[])
+      if command_strings.empty?
+        stop_group(running)
+      else
+        names = @service.resolve(command_strings)
+        stop_group(names)
+      end
+    end
+
+    def start_group(names)
+      ordered = @service.start_order(names)
+      ordered.each do |name|
+        command = service.commands[name]
         @commands_by_name[name] = command
         start_command(name, command) unless @down_in_flames
       end
-
-      until hash.keys.all? { |key| @threads[key] }
+      until names.all? { |name| @threads[name] }
         return false if @down_in_flames
         sleep 0.1
       end
       return true
+    end
+
+    def stop_group(names)
+      @mutex.synchronize do
+        ordered = @service.stop_order(names)
+        ordered.each do |name|
+          term(name)
+        end
+      end
     end
 
     def start_command(name, command)
@@ -51,10 +85,6 @@ class Fate
       else
         spawn(name, command)
       end
-    end
-
-    def stop_command(name)
-      term(name)
     end
 
     def term(name)
@@ -164,19 +194,8 @@ class Fate
       end
       logger.info "Shutting down all processes."
 
-      stop_all
+      stop_group(running)
       exit(1)
-    end
-
-
-    # ad hoc shell out, with rescuing because of some apparent bugs
-    # in MRI 1.8.7's ability to cope with unusual exit codes.
-    def system(command)
-      #begin
-        Kernel.system command
-      #rescue => error
-        #puts "Exception raised when executing '#{command}': #{error.inspect}"
-      #end
     end
 
 

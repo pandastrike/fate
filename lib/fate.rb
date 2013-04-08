@@ -13,104 +13,67 @@ class Fate
     self.new(specification).start(&block)
   end
 
-  attr_reader :service, :manager, :completions, :logger
-
-  def initialize(spec, options={})
-    @service = Service.new(spec, options)
-    @completions = @service.completions
-
-    @spec = spec
-    @logger = @service.logger["Fate Control"]
-
-    @manager = ProcessManager.new(@service, options)
+  attr_reader :service, :manager, :control
+  def initialize(specification, options)
+    @service = Fate::Service.new(specification, options)
+    @manager = Fate::ProcessManager.new(service, options)
+    @control = Fate::Control.new(@manager, options)
   end
 
-  def log(*args, &block)
-    @logger.log(*args, &block)
-  end
+  class Control
 
-  def run(&block)
-    if start
-      if block
-        yield(self)
-        stop
-      end
-    else
-      logger.error "Failed to start"
+    attr_reader :service, :manager, :completions, :logger
+
+    def initialize(manager, options={})
+      @manager = manager
+      @service = @manager.service
+      @completions = @service.completions
+
+      @spec = @service.specification
+      @logger = @service.logger["Fate Control"]
     end
-  end
 
-  def start(command_specs=[])
-    if command_specs.size > 0
-      command_specs.each do |command_spec|
-        self.start_command(command_spec)
-      end
-    else
-      if manager.start_group(@service.commands)
-        logger.green "All commands are running."
-        true
+    def log(*args, &block)
+      @logger.log(*args, &block)
+    end
+
+    def start(*command_strings)
+      if manager.start(command_strings)
+        logger.green "All processes are running."
       else
-        false
+        logger.error "Failed to start."
       end
     end
-  end
 
-  def stop
-    manager.stop_all
-  end
-
-  def restart
-    stop
-    start
-  end
-
-  def start_command(command_spec)
-    names = @service.resolve_commands(command_spec)
-    if names.empty?
-      puts "No commands found for: #{command_spec}"
-    else
-      commands = {}
-      names.each do |name|
-        command = @service.commands[name]
-        commands[name] = command
-      end
-      if manager.start_group(commands)
-        logger.green "All commands in '#{command_spec}' running."
-      else
-        logger.error "Failed to start '#{command_spec}'."
-      end
+    def stop(*command_strings)
+      manager.stop(command_strings)
     end
-  end
 
-  def stop_command(command_spec)
-    names = @service.resolve_commands(command_spec)
-    if names.empty?
-      puts "No commands found for: #{command_spec}"
-    else
-      names.each do |name|
-        manager.stop_command(name)
+    def restart(*command_strings)
+      stop(command_strings)
+      start(command_strings)
+    end
+
+    # Run only the processes specified by the arguments.  Any existing
+    # processes outside this set will be stopped.
+    def run(*command_strings)
+      manager.run(command_strings)
+    end
+
+    def running
+      manager.running
+    end
+
+    # ad hoc shell out, with rescuing because of some apparent bugs
+    # in MRI 1.8.7's ability to cope with unusual exit codes.
+    def system(command)
+      begin
+        Kernel.system command
+      rescue => error
+        puts "Exception raised when executing '#{command}': #{error.inspect}"
       end
     end
-  end
 
-  def restart_command(name)
-    stop_command(name)
-    start_command(name)
   end
-
-  def running
-    manager.running
-  end
-
-  # ad hoc shell out, with rescuing because of some apparent bugs
-  # in MRI 1.8.7's ability to cope with unusual exit codes.
-  def system(command)
-    begin
-      Kernel.system command
-    rescue => error
-      puts "Exception raised when executing '#{command}': #{error.inspect}"
-    end
-  end
-
 end
 
