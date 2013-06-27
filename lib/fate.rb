@@ -50,8 +50,8 @@ class Fate
     end
 
     def restart(*command_strings)
-      stop(command_strings)
-      start(command_strings)
+      stop(*command_strings)
+      start(*command_strings)
     end
 
     # Run only the processes specified by the arguments.  Any existing

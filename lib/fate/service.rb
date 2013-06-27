@@ -113,8 +113,8 @@ class Fate
       if @commands.has_key?(name)
         targets << name
       elsif @groups.has_key?(name)
-        @groups[name].each do |gname|
-          targets += resolve_commands(gname)
+        @groups[name].each do |group_name|
+          targets += resolve_commands(group_name)
         end
       else
         regex = /^#{name}\..*/
