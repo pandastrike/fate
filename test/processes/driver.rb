@@ -5,5 +5,5 @@ string = ARGV[0]
 loop do
   puts "Test #{string} #{counter += 1}"
   STDOUT.flush
-  sleep (rand * 5)
+  sleep (rand * 15)
 end
