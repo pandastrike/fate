@@ -134,7 +134,15 @@ class Fate
           handler = output_handlers[name]
           # First line written to STDOUT is assumed to be the service
           # signalling that it is ready.
-          line = pipe.gets
+          line = nil
+          loop do
+            line = pipe.gets
+            if line =~ /debug/i
+              handler.write(line)
+            else
+              break
+            end
+          end
           @mutex.synchronize do
             unless @down_in_flames
               logger.info "#{name} is running."

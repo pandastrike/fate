@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "fate"
-  s.version = "0.3.1"
+  s.version = "0.3.2"
   s.authors = ["Matthew King"]
   s.homepage = "https://github.com/automatthew/fate"
   s.summary = "Tool for running and interacting with a multi-process service"
@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
     LICENSE
     README.md
   ] + Dir["lib/**/*.rb"]
+  s.license = "MIT"
   s.require_path = "lib"
   s.executables = "fate"
 
