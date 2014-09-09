@@ -18,7 +18,7 @@ options = {
 
 # TODO: config file flag
 OptionParser.new do |parser|
-  parser.on("-c", "--configuration=FILE", "The origin of the events") do |file|
+  parser.on("-c", "--configuration=FILE", "Path to the configuration file") do |file|
     options[:specification] = file
   end
   parser.on("-l", "--log=FILE", "Processes log to FILE") do |file|

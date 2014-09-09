@@ -33,7 +33,12 @@ class Fate
     }
 
     def self.validate(spec)
-      JSON::Validator.fully_validate(SpecificationSchema, spec)
+      JSON::Validator.fully_validate(
+        SpecificationSchema, spec,
+        :version => :draft3
+      )
+
+      #JSON::Validator.fully_validate(SpecificationSchema, spec)
     end
 
     attr_reader :names, :commands, :completions, :specification
