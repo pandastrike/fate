@@ -1,3 +1,8 @@
+## Install
+
+    gem install fate
+
+## Configure
 
 Example of a service spec:
 
@@ -11,6 +16,8 @@ Example of a service spec:
 }
 
 ```
+
+## Use
 
 Command line usage:
 
